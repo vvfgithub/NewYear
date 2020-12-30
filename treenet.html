@@ -1,0 +1,544 @@
+
+<!DOCTYPE html>
+<html> 	
+   <head>
+     <meta charset="utf-8"> 
+     <title>My first three.js app</title> 	
+     <style> 
+       body { margin: 0; } 
+       canvas { display: block; }
+     </style>
+   </head> 
+   <body> 
+
+   <script src="https://threejs.org/build/three.js"></script> 
+
+<!---
+   <script src="js/three.js"></script>
+
+   <script src="js/OrbitControls.js"></script> 
+--->
+
+  <script src="http://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+     <script> 	
+       const scene = new THREE.Scene();
+	   
+	
+       const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 1000 ); 
+       const renderer = new THREE.WebGLRenderer(); 
+       renderer.setSize( window.innerWidth, window.innerHeight ); 
+       document.body.appendChild( renderer.domElement ); 
+       
+       camera.lookAt (new THREE.Vector3(0, 0, 0)); 
+       
+       const controls = new THREE.OrbitControls (camera, renderer.domElement);
+       controls.maxPolarAngle=Math.PI*0.5;
+       controls.maxDistance=200;
+ //      controls.enablePan=true;
+//  	   controls.pan(0, 200);
+      { 
+        const color = 0xFFFFFF; 
+        const intensity = 1;
+        const light = new THREE.DirectionalLight(color, intensity);
+        light.position.set(-1, 2, 4);
+        scene.add(light);
+      }
+      var ds;      
+       
+      var rotateAroundWorldAxis = function(object, axis, radians) { 
+       	 var rotWorldMatrix = new THREE.Matrix4(); 
+       	 rotWorldMatrix.makeRotationAxis(axis.normalize(), radians); 
+       	 var currentPos = new THREE.Vector4(object.position.x, object.position.y, object.position.z, 1); 
+       	 var newPos = currentPos.applyMatrix4(rotWorldMatrix); 
+       	 rotWorldMatrix.multiply(object.matrix); 
+       	 object.matrix = rotWorldMatrix; 
+       	 object.rotation.setFromRotationMatrix(object.matrix); 
+       	 object.position.x = newPos.x; 
+       	 object.position.y = newPos.y; 
+       	 object.position.z = newPos.z; 
+      }; 
+            
+       const animate = function () { 		
+         controls.update();
+         requestAnimationFrame( animate );
+         line.rotation.y += 0.01;
+         star.rotation.y += 0.01;
+         const v = new THREE.Vector3(0,1,0);
+         for (let i = 0; i < spheres.length; i++) {
+         	rotateAroundWorldAxis(spheres[i], v, 0.01);
+         }
+
+         if (spheresn4.position.y>-12) {
+         	ds=-0.05
+         }
+         if (spheresn4.position.y<-16) {
+         	ds=0.05
+         }
+         spheresn4.position.y+=ds;
+         spheresn5.position.y-=ds;
+         spheresn6.position.y-=ds;
+         spheresn7.position.y+=ds;
+         group.rotation.y+=-ds*0.1;
+         
+         renderer.render( scene, camera ); 		
+       }; 		
+             
+       //create a green LineBasicMaterial 		
+       const colort = 0x008000
+//       const material = new THREE.LineDashedMaterial({ color: colort});		
+       const material = new THREE.LineBasicMaterial({ color: colort, linewidth: 3});		
+       
+       const points = []; 
+       const b = 0.5;
+       const a = 1;
+       const h = 100;
+       const dl = 1;
+       for (let i = 0; i < h; i++) {
+	     y = i*b;
+    	 al=a*i;
+    	 if (i<20) {
+    	   c=i*0.2;
+    	 } else {
+  		   c=(h-i)*0.2;
+		 }
+         x = Math.cos(al)*c;
+         z = Math.sin(al)*c;
+         len=Math.sqrt(x*x+z*z);
+         l=dl;
+         y1=y+dl; y2=y-dl;
+         xc=x/c; zc=z/c;
+         xi0=0; zi0=0;
+         sinal=z/len;
+         dx=-z/len; dz=x/len;
+         while (l<len) {
+           xi=xc*l; zi=zc*l;
+           
+           points.push( new THREE.Vector3( xi, y1, zi ) );
+           points.push( new THREE.Vector3( xi0, y, zi0 ) );
+           points.push( new THREE.Vector3( xi, y2, zi ) );
+           points.push( new THREE.Vector3( xi0, y, zi0 ) );  
+           
+           points.push( new THREE.Vector3( xi+dx, y, zi+dz ) );
+           points.push( new THREE.Vector3( xi0, y, zi0 ) );
+           points.push( new THREE.Vector3( xi-dx, y, zi-dz ) );
+           points.push( new THREE.Vector3( xi0, y, zi0 ) );
+           points.push( new THREE.Vector3( xi, y, zi ) );
+           
+           l+=dl;
+           xi0=xi; zi0=zi;
+         }
+         points.push( new THREE.Vector3( 0, y, 0 ) );
+       }
+       const geometry = new THREE.BufferGeometry().setFromPoints( points );	
+       const line = new THREE.Line( geometry, material );
+       scene.add( line ); 
+       line.position.set(0, -30, 0);
+       renderer.render( scene, camera );
+	   
+	   function addsphere(geometry, color, x,y,z) {
+         const material = new THREE.MeshPhongMaterial({
+         			emissive:color, emissiveIntensity:1});
+         const sphere = new THREE.Mesh(geometry, material);
+         scene.add(sphere);
+         sphere.position.set(x, y, z);
+         return sphere;
+       }   
+       
+       const geometrysp = new THREE.SphereBufferGeometry( 1.0, 32, 32 ); 
+       const spheres = [
+         addsphere(geometrysp, 0x44aa88, 0, 0, 5),
+         addsphere(geometrysp, 0x8844aa, 3, 5, 0),
+         addsphere(geometrysp, 0xaa8844, -5, -5, -5),
+         addsphere(geometrysp, 0xFFFF00, 7, -10, 7),
+         addsphere(geometrysp, 0xC0C0C0, -7, -15, 7),
+         addsphere(geometrysp, 0x008080, 5, -5, 5),
+         addsphere(geometrysp, 0xFF0000, 5, -10, -5),
+         addsphere(geometrysp, 0x0000FF, -2, -3, -5),
+         addsphere(geometrysp, 0x00FF00, -3, -7, 3),
+         ];
+        
+       const geometry3 = new THREE.ConeBufferGeometry( 0.3, 50, 32 ); 
+       const material3 = new THREE.MeshBasicMaterial( {color: 0x8B4513} ); 
+       const cone = new THREE.Mesh( geometry3, material3 ); 
+       cone.position.set(0, -5, 0);
+       scene.add( cone );
+       
+       const shape = new THREE.Shape(); 
+       al0=Math.PI*2/5; al1=0.5*al0;
+       R=2; r=0.7;
+       shape.moveTo( 0, R ); 
+       for (let i = 1; i < 5; i++) {
+		 al=al0*i;
+		 alm=al-al1;
+		 x=r*Math.sin(alm);
+		 y=r*Math.cos(alm);
+         shape.lineTo( x,y );
+       	 x=R*Math.sin(al);
+         y=R*Math.cos(al);
+         shape.lineTo( x,y );
+       }
+       alm=al+al1;
+       x=r*Math.sin(alm);
+       y=r*Math.cos(alm);
+       shape.lineTo( x,y );
+       shape.lineTo( 0, R );
+       const extrudeSettings = {
+       	 steps: 2, 	depth: 0.25,
+       	 bevelEnabled: false, 	bevelThickness: 0.1, 	
+       	 bevelSize: 1, 	bevelOffset: 0, 	
+       	 bevelSegments: 2 
+       	 }; 
+       const geometrysh = new THREE.ExtrudeBufferGeometry( shape, extrudeSettings ); 
+       scolor=0x800000;
+//       scolor=0xFF0000;
+       const materialsh = new THREE.MeshPhongMaterial( { 
+       					emissive:scolor, emissiveIntensity:1 } ); 
+       const star = new THREE.Mesh( geometrysh, materialsh ) ; 
+       scene.add( star );       
+       star.position.set(0, 20, 0);
+              
+      // var geometryp = new THREE.PlaneGeometry( 400, 400); 
+       radius=400; segments=64;
+   //    colorp=0xE0FFFF;
+       colorp=0xFFFAFA;
+       geometryp = new THREE.CircleGeometry( radius, segments );
+       var materialp = new THREE.MeshBasicMaterial( { color:colorp} );
+       mesh = new THREE.Mesh(geometryp, materialp ); 
+       mesh.position.y = -30; 
+       mesh.rotation.x = -Math.PI*0.5;
+       mesh.doubleSided = true;  
+       scene.add( mesh ); 
+       xs=-25; zs=-25;
+       ds=0.05;       
+       const geometrysn = new THREE.SphereBufferGeometry( 6.0, 32, 32 ); 
+       const spheresn = addsphere(geometrysn, 0x2F4F4F, xs, -22, zs);
+       
+       const geometrysn2 = new THREE.SphereBufferGeometry( 4.0, 32, 32 ); 
+       const spheresn2 = addsphere(geometrysn2, 0x2F4F4F, xs, -14, zs);
+       
+       const geometrysn3 = new THREE.SphereBufferGeometry( 3, 32, 32 ); 
+  //     const spheresn3 = addsphere(geometrysn3, 0x2F4F4F, xs, -8, zs);
+       
+       const materialsn = new THREE.MeshPhongMaterial({
+       emissive:0x2F4F4F, emissiveIntensity:1});            
+       const spheresn3 = new THREE.Mesh(geometrysn3, materialsn);          
+ //      spheresn3.position.set(xs, -8, zs);
+       spheresn3.position.set(0, -8, 0);
+       const group = new THREE.Group();       
+       group.add(spheresn3);
+       
+       const geometrysn4 = new THREE.SphereBufferGeometry( 2, 32, 32 ); 
+       
+       const spheresn4 = addsphere(geometrysn4, 0x2F4F4F, xs+5, -14+ds, zs);
+       const spheresn5 = addsphere(geometrysn4, 0x2F4F4F, xs-5, -14-ds, zs);
+       
+       const spheresn6 = addsphere(geometrysn4, 0x2F4F4F, xs+5, -26-ds, zs);
+       const spheresn7 = addsphere(geometrysn4, 0x2F4F4F, xs-5, -26+ds, zs);
+
+	   const radialSegments=16;
+	   const radiusc=0.5;
+	   const heightc=3;
+	   const geometryc = new THREE.ConeBufferGeometry(radiusc, heightc, radialSegments);
+	   
+	   const materialc = new THREE.MeshBasicMaterial( {color: 0xFF0000} ); 
+	   con = new THREE.Mesh(geometryc, materialc ); 
+       con.position.set(0, -7.6, 4); 
+	   con.rotation.x = Math.PI*0.45;  
+	   group.add(con);
+	   
+	   const geometryt = new THREE.CylinderBufferGeometry(  1.8, 2.7, 4, 32 ); 
+	   const materialt = new THREE.MeshPhongMaterial( {color: 0x808080} ); 
+	   const cylindert = new THREE.Mesh( geometryt, materialt );
+	   cylindert.position.set(-0.5, -4, -1);
+	   cylindert.rotation.x=-0.3;
+	   cylindert.rotation.z=0.1;
+	   group.add(cylindert);
+	   
+	   geometrye = new THREE.CircleGeometry( 0.3, 16 );
+	   var materiale = new THREE.MeshBasicMaterial( { color:000000} );
+	   eyes = new THREE.Mesh(geometrye, materiale ); 
+	   eyes.position.set(1.1,-7,3); 
+	   group.add(eyes);
+	   eyes2 = new THREE.Mesh(geometrye, materiale ); 
+	   eyes2.position.set(-1.1,-7,3); 
+	   group.add(eyes2);
+	   
+	   const curve = new THREE.EllipseCurve(	
+		   0, 0, // ax, aY 	
+		   1.1, 0.7, // xRadius, yRadius 	
+		   0, Math.PI, // aStartAngle, aEndAngle 	
+		   false, // aClockwise 	
+		   0 // aRotation 
+		   ); 
+	   const pointsm = curve.getPoints( 5 ); 
+	   const geometrym = new THREE.BufferGeometry().setFromPoints( pointsm );
+	   const materialm = new THREE.LineBasicMaterial( { color : 0x000000, linewidth: 1 } );
+	   const mouth = new THREE.Line( geometrym, materialm );	   
+	   mouth.rotation.x=Math.PI;
+	   mouth.position.set(0, -8.3, 2.9);
+	   group.add(mouth);
+	   
+	   group.position.set(xs, 0, zs);
+	   scene.add( group ); 
+
+	 const groupy = new THREE.Group();       
+
+     const extrudeSettingsy = { 	
+     steps: 2,
+     depth: 1, 	
+     bevelEnabled: true, 	
+     bevelThickness: 1, 	
+     bevelSize: 1, 	
+     bevelOffset: 0, 	
+     bevelSegments: 1 
+     }; 
+     
+w = 3; 
+const shape2 = new THREE.Shape(); 
+shape2.moveTo( w, -w ); 
+     
+shape2.lineTo( 1.5*w, -w ); 
+shape2.lineTo( 2*w, -1.5*w ); 
+     
+shape2.lineTo( 2*w, -2.5*w );	     
+shape2.lineTo( -0.5*w, -5*w ); 
+shape2.lineTo( -0.5*w, -6*w );
+shape2.lineTo( 3*w, -6*w );
+shape2.lineTo( 3*w, -5*w );
+shape2.lineTo( w, -5*w );
+shape2.lineTo( 3*w, -3*w );
+     
+shape2.lineTo( 3*w, -w );
+shape2.lineTo( 2*w, 0 );
+     
+shape2.lineTo( 0.5*w,  0 );
+shape2.lineTo( -0.5*w,  -0.5*w );
+shape2.lineTo( -0.5*w, -1.5*w );
+shape2.lineTo( 0.5*w, -w );
+
+const geometrym2 = new THREE.ExtrudeBufferGeometry( shape2, extrudeSettingsy ); 
+//const materialmy = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } ); 
+const materialmy = new THREE.MeshPhongMaterial({
+       emissive:0x008080, emissiveIntensity:1}); 
+//C0C0C0  //2F4F4F
+const mesh2 = new THREE.Mesh( geometrym2, materialmy ) ;	
+mesh2.position.set(-4*w, 10, -10);
+groupy.add(mesh2);
+
+const shape0 = new THREE.Shape(); 
+shape0.moveTo( w, -w ); 
+
+shape0.lineTo( 1.5*w, -w ); 
+shape0.lineTo( 2*w, -1.5*w ); 
+
+shape0.lineTo( 2*w, -4.5*w );	     
+shape0.lineTo( 1.5*w, -5*w );	     
+shape0.lineTo( w, -5*w );	     
+shape0.lineTo( 0.5*w, -4.5*w );	     
+shape0.lineTo( 0.5*w, -1.5*w );	     
+shape0.lineTo( -0.5*w, -1.5*w );	     
+shape0.lineTo( -0.5*w, -5*w );	     
+shape0.lineTo( 0.5*w, -6*w );	     
+shape0.lineTo( 2*w, -6*w );	     
+shape0.lineTo( 3*w, -5*w );	     
+shape0.lineTo( 3*w, -w );	     
+shape0.lineTo( 2*w, 0 );	     
+shape0.lineTo( 0.5*w, 0 );	     
+shape0.lineTo( -0.5*w, -w );	     
+shape0.lineTo( -0.5*w, -2*w );	     
+shape0.lineTo( 0.5*w, -2*w );	     
+shape0.lineTo( 0.5*w, -1.5*w );	     
+shape0.lineTo( w, -w );
+	
+const geometrym0 = new THREE.ExtrudeBufferGeometry( shape0, extrudeSettingsy ); 
+const mesh0 = new THREE.Mesh( geometrym0, materialmy ) ;	
+mesh0.position.set(w, 10, -10);
+groupy.add(mesh0);
+	
+var mesh02 = mesh2.clone();
+mesh02.position.set(6*w, 10, -10);
+groupy.add(mesh02);
+
+const shape01 = new THREE.Shape(); 
+shape01.moveTo( 2*w, 0 ); 		
+shape01.lineTo( 2*w, 0 );
+shape01.lineTo( 3*w, 0 );
+shape01.lineTo( 3*w, -6*w );
+shape01.lineTo( 2*w, -6*w );
+shape01.lineTo( 2*w, -w );
+shape01.lineTo( 0, -2*w );
+shape01.lineTo( 0, -w );
+ 
+const geometrym01 = new THREE.ExtrudeBufferGeometry( shape01, extrudeSettingsy ); 
+const mesh01 = new THREE.Mesh( geometrym01, materialmy ) ;	
+mesh01.position.set(10*w, 10, -10);
+groupy.add(mesh01);
+
+groupy.position.set(-10, 20, -30);
+//groupy.rotation.y=0.7
+scene.add( groupy ); 
+
+const groupv = new THREE.Group();       
+
+v=10; hm=3*v; am=11.4*v; dm=2*v; bm=10.4*v; cm=0.5*bm;
+ac=10*v; bc=9*v;
+const pointsv = [];
+
+pointsv.push( new THREE.Vector3( 0, 0, 0 ) );
+pointsv.push( new THREE.Vector3( am-dm, hm, cm ) );
+pointsv.push( new THREE.Vector3( am, 0, 0 ) );
+
+pointsv.push( new THREE.Vector3( 0, 0, 0 ) );
+pointsv.push( new THREE.Vector3( dm, hm, cm ) );
+pointsv.push( new THREE.Vector3( am-dm, hm, cm ) );
+
+pointsv.push( new THREE.Vector3( 0, 0, bm ) );
+pointsv.push( new THREE.Vector3( am, 0, bm ) );
+pointsv.push( new THREE.Vector3( am-dm, hm, cm ) );
+
+    pointsv.push( new THREE.Vector3( 0, 0, bm ) );
+pointsv.push( new THREE.Vector3( am-dm, hm, cm ) );
+pointsv.push( new THREE.Vector3( dm, hm, cm ) );
+
+pointsv.push( new THREE.Vector3( 0, 0, bm ) );
+pointsv.push( new THREE.Vector3( dm, hm, cm ) );
+pointsv.push( new THREE.Vector3( 0, 0, 0 ) );
+
+pointsv.push( new THREE.Vector3( am, 0, 0 ) );
+pointsv.push( new THREE.Vector3( am-dm, hm, cm ) );
+pointsv.push( new THREE.Vector3( am, 0, bm ) );
+
+const geometryv = new THREE.BufferGeometry().setFromPoints( pointsv );	
+//	const materialv = new THREE.MeshBasicMaterial( {color: 0xFFFFFF} ); 
+const materialv = new THREE.MeshPhongMaterial({
+	emissive:0xFFFFFF, emissiveIntensity:1}); 
+const meshv = new THREE.Mesh( geometryv, materialv ); 
+meshv.position.set(-5.7*v, 3*v, -bm*0.5);
+groupv.add( meshv );
+
+scene.add( groupv ); 
+
+    const geometryv2 = new THREE.BoxGeometry( ac, 6*v, bc ); 
+    const materialv2 = new THREE.MeshPhongMaterial( {color: 0xB22222} ); 
+    const cubev2 = new THREE.Mesh( geometryv2, materialv2 );
+    cubev2.position.set(0, 0, 0);
+    groupv.add( cubev2 );
+    
+    const geometryv3 = new THREE.BoxGeometry( ac, 0.2*v, 4*v ); 
+    const materialv3 = new THREE.MeshBasicMaterial( {color: 0xFFFFFF} ); 
+    const cubev3 = new THREE.Mesh( geometryv3, materialv3 );
+    cubev3.position.set(0, 0.25*v, 6*v );
+    cubev3.rotation.x=0.15;
+    groupv.add( cubev3 );
+    
+    const geometryv4 = new THREE.BoxGeometry( am-1.4*v, v, 3*v+bm-1.3*v ); 
+    const materialv4 = new THREE.MeshPhongMaterial( {color: 0xC0C0C0 } ); 
+    const cubev4 = new THREE.Mesh( geometryv4, materialv4 );
+    cubev4.position.set(0, -3.5*v, 1.5*v);
+    groupv.add( cubev4 );
+    
+    const geometryvs = new THREE.BoxGeometry( 0.25*v, 3*v, 0.25*v ); 
+    const materialvs = new THREE.MeshPhongMaterial( {color: 0xB22222} ); 
+    const cubevs = new THREE.Mesh( geometryvs, materialvs );
+    cubevs.position.set(3*v, -1.5*v, 7.5*v);
+    groupv.add( cubevs );
+    
+    var cubevs1 = cubevs.clone();
+    cubevs1.position.x=-4.5*v;
+    groupv.add(cubevs1);
+    
+    var cubevs2 = cubevs.clone();
+    cubevs2.position.x=4.5*v;
+    groupv.add(cubevs2);
+    
+     var cubevs3 = cubevs.clone();
+     cubevs3.position.x=-2.7*v;
+     groupv.add(cubevs3);
+     
+     var cubevs4 = cubevs.clone();
+     cubevs4.position.x=-0.7*v;
+     groupv.add(cubevs4);
+     
+     var cubevs5 = cubevs.clone();
+     cubevs5.position.x=1.2*v;
+     groupv.add(cubevs5);
+     
+    const shapew = new THREE.Shape(); 
+    shapew.moveTo( 0, 0 ); 
+    shapew.lineTo( 0.5*v, 0.25*v ); 
+shapew.lineTo( v, 0.25*v ); 
+shapew.lineTo( 1.5*v, 0 ); 
+shapew.lineTo( 1.5*v, -1.4*v ); 
+shapew.lineTo( 0., -1.4*v ); 
+const geometryw = new THREE.ShapeBufferGeometry( shapew ); 
+//	const materialw = new THREE.MeshPhongMaterial( { color: 0xFFD700 } ); 
+const materialw = new THREE.MeshPhongMaterial({
+	emissive:0xFFFF00, emissiveIntensity:1}); 
+	
+const meshw = new THREE.Mesh( geometryw, materialw ) ; 
+meshw.position.set(-3.5*v, 2.5*v, 4.6*v);
+groupv.add(meshw);
+
+var meshw2 = meshw.clone();
+meshw2.position.set(2*v, 2.5*v, 4.6*v);
+groupv.add(meshw2);
+
+var meshw3 = meshw.clone();
+meshw3.position.set(-3.5*v, -v, 4.6*v);
+groupv.add(meshw3);
+
+var meshw4 = meshw.clone();
+meshw4.position.set(2*v, -v, 4.6*v);
+groupv.add(meshw4);
+
+var meshw5 = meshw.clone();
+meshw5.rotation.y=-Math.PI*0.5;
+meshw5.position.x=-5*v;
+meshw5.position.z=1*v;
+groupv.add(meshw5);
+
+var meshw6 = meshw.clone();
+meshw6.rotation.y=-Math.PI*0.5;
+meshw6.position.x=-5*v;
+meshw6.position.z=-3*v;
+groupv.add(meshw6);
+
+var meshw7 = meshw.clone();
+meshw7.rotation.y=Math.PI*0.5;
+meshw7.position.x=5*v;
+meshw7.position.z=-1.5*v;
+groupv.add(meshw7);
+
+var meshw8 = meshw.clone();
+meshw8.rotation.y=Math.PI*0.5;
+meshw8.position.x=5*v;
+meshw8.position.z=3*v;
+groupv.add(meshw8);
+
+var meshw9 = meshw.clone();
+meshw9.rotation.y=Math.PI;
+meshw9.position.x=3.5*v;
+meshw9.position.z=-4.5*v;
+groupv.add(meshw9);
+
+var meshw10 = meshw.clone();
+meshw10.rotation.y=Math.PI;
+meshw10.position.x=-2*v;
+meshw10.position.z=-4.5*v;
+groupv.add(meshw10);
+
+
+groupv.position.set(10, v, -115);
+
+camera.position.set(-100,0,200);
+
+const color = 0x191970; //'lightblue';
+	 //  const color = 'midnightblue';
+	   scene.background = new THREE.Color(color);
+//       scene.fog=new THREE.Fog( 0xffffff, 0.015, 400 );
+  
+       animate();
+     </script>
+   </body> 
+</html>
