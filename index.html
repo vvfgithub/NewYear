@@ -3,7 +3,7 @@
 <html> 	
    <head>
      <meta charset="utf-8"> 
-     <title>My first three.js app</title> 	
+     <title>С Новым годом!</title> 	
      <style> 
        body { margin: 0; } 
        canvas { display: block; }
@@ -20,12 +20,20 @@
 
 <!---
   <script src="http://threejs.org/examples/js/controls/OrbitControls.js"></script>
-
  --->
+ 
+     <div style="
+            position: absolute; 
+            bottom: 0; left: 0;">
+            <audio controls> 
+            <source src="elochka.mp3" type="audio/mpeg"/> 
+            </audio> 
+            v_lesu_rodilas_elocka_minusovka_.mp3
+     </div>
+            
      <script> 	
        const scene = new THREE.Scene();
-	   
-	
+	   	
        const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 1000 ); 
        const renderer = new THREE.WebGLRenderer(); 
        renderer.setSize( window.innerWidth, window.innerHeight ); 
@@ -473,7 +481,7 @@ shapew.lineTo( 1.5*v, 0 );
 shapew.lineTo( 1.5*v, -1.4*v ); 
 shapew.lineTo( 0., -1.4*v ); 
 const geometryw = new THREE.ShapeBufferGeometry( shapew ); 
-//	const materialw = new THREE.MeshPhongMaterial( { color: 0xFFD700 } ); 
+ 
 const materialw = new THREE.MeshPhongMaterial({
 	emissive:0xFFFF00, emissiveIntensity:1}); 
 	
@@ -529,6 +537,16 @@ meshw10.position.x=-2*v;
 meshw10.position.z=-4.5*v;
 groupv.add(meshw10);
 
+const shaped = new THREE.Shape(); 
+   shaped.moveTo( 0, 0 ); 
+   shaped.lineTo( 1.5*v, 0 );  
+   shaped.lineTo( 1.5*v, 2.3*v );
+   shaped.lineTo( 0, 2.3*v ); 
+const geometryd = new THREE.ShapeBufferGeometry( shaped );
+const meshd = new THREE.Mesh( geometryd, materialw ) ; 
+
+meshd.position.set(-v, -2.9*v, 4.6*v);
+groupv.add(meshd);
 
 groupv.position.set(10, v, -115);
 
@@ -539,7 +557,9 @@ const color = 0x191970; //'lightblue';
 	   scene.background = new THREE.Color(color);
 //       scene.fog=new THREE.Fog( 0xffffff, 0.015, 400 );
   
-       animate();
+      animate();
      </script>
+     
+     
    </body> 
 </html>
