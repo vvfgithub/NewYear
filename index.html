@@ -26,7 +26,9 @@
             position: absolute; 
             bottom: 0; left: 0;">
             <audio controls> 
-            <source src="elochka.mp3" type="audio/mpeg"/> 
+            <source src="elochka.mp3"
+               type="audio/mpeg"
+               autoplay> 
             </audio> 
             v_lesu_rodilas_elocka_minusovka_.mp3
      </div>
@@ -55,29 +57,12 @@
       }
       var ds;      
        
-      var rotateAroundWorldAxis = function(object, axis, radians) { 
-       	 var rotWorldMatrix = new THREE.Matrix4(); 
-       	 rotWorldMatrix.makeRotationAxis(axis.normalize(), radians); 
-       	 var currentPos = new THREE.Vector4(object.position.x, object.position.y, object.position.z, 1); 
-       	 var newPos = currentPos.applyMatrix4(rotWorldMatrix); 
-       	 rotWorldMatrix.multiply(object.matrix); 
-       	 object.matrix = rotWorldMatrix; 
-       	 object.rotation.setFromRotationMatrix(object.matrix); 
-       	 object.position.x = newPos.x; 
-       	 object.position.y = newPos.y; 
-       	 object.position.z = newPos.z; 
-      }; 
             
        const animate = function () { 		
          controls.update();
          requestAnimationFrame( animate );
-         line.rotation.y += 0.01;
-         star.rotation.y += 0.01;
-         const v = new THREE.Vector3(0,1,0);
-         for (let i = 0; i < spheres.length; i++) {
-         	rotateAroundWorldAxis(spheres[i], v, 0.01);
-         }
-
+         linegroup.rotation.y += 0.01;
+  
          if (spheresn4.position.y>-12) {
          	ds=-0.05
          }
@@ -141,7 +126,7 @@
        }
        const geometry = new THREE.BufferGeometry().setFromPoints( points );	
        const line = new THREE.Line( geometry, material );
-       scene.add( line ); 
+   //    scene.add( line ); 
        line.position.set(0, -30, 0);
        renderer.render( scene, camera );
 	   
@@ -166,6 +151,12 @@
          addsphere(geometrysp, 0x0000FF, -2, -3, -5),
          addsphere(geometrysp, 0x00FF00, -3, -7, 3),
          ];
+        
+        const linegroup = new THREE.Group();       
+        linegroup.add(line);     
+        for (let i = 0; i < spheres.length; i++) 
+          linegroup.add(spheres[i]);
+        scene.add( linegroup );
         
        const geometry3 = new THREE.ConeBufferGeometry( 0.3, 50, 32 ); 
        const material3 = new THREE.MeshBasicMaterial( {color: 0x8B4513} ); 
@@ -204,9 +195,9 @@
        const materialsh = new THREE.MeshPhongMaterial( { 
        					emissive:scolor, emissiveIntensity:1 } ); 
        const star = new THREE.Mesh( geometrysh, materialsh ) ; 
-       scene.add( star );       
+//       scene.add( star );       
        star.position.set(0, 20, 0);
-              
+      linegroup.add( star );        
       // var geometryp = new THREE.PlaneGeometry( 400, 400); 
        radius=400; segments=64;
    //    colorp=0xE0FFFF;
